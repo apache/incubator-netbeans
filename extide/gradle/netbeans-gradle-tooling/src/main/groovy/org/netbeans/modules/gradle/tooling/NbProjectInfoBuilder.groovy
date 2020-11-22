@@ -148,7 +148,9 @@ class NbProjectInfoBuilder {
             'ivy-publish', 'antlr', \
             'org.springframework.boot', \
             'com.github.lkishalmi.gatling', \
-            'com.android.library', 'com.android.application']) {
+            'com.android.library', 'com.android.application',
+            'org.jetbrains.kotlin.android', 'org.jetbrains.kotlin.js',
+            'org.jetbrains.kotlin.jvm']) {
             if (project.plugins.hasPlugin(plugin)) {
                 plugins.add(plugin);
             }

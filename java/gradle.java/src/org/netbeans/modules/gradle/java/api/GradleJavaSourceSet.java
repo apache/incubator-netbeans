@@ -48,9 +48,11 @@ public final class GradleJavaSourceSet implements Serializable {
     })
     public static enum SourceType {
 
-        JAVA, GROOVY, SCALA, KOTLIN, RESOURCES,
+        JAVA, GROOVY, SCALA, RESOURCES,
         /** @since 1.8 */
-        GENERATED;
+        GENERATED,
+        /** @since 1.11 */
+        KOTLIN;
 
         @Override
         public String toString() {
