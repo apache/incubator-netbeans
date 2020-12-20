@@ -1285,16 +1285,18 @@ public class ElementJavadoc {
                     break;
                 default : {
                     // process tags that we cannot add directly because they are not accessible during compilation
-                    DocTree.Kind values[] = tag.getKind().getClass().getEnumConstants();
-                    DocTree.Kind summaryTag = Arrays.stream(values).filter(v->v.name().equals("SUMMARY")).findFirst().orElse(null);
-                    if (summaryTag != null && tag.getKind() == summaryTag) {
-                        try {
-                            Method getSummaryMethod = tag.getClass().getDeclaredMethod("getSummary");
-                            List<? extends DocTree> summaryList = (List<? extends DocTree>)getSummaryMethod.invoke(tag);
-                            sb.append(inlineTags(summaryList, docPath, doc, trees, null));
-                        } catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                            // IGNORE
-                        }
+                    switch(tag.getKind().name()) {
+                        case "SUMMARY" : 
+                            try {
+                                Method getSummaryMethod = tag.getClass().getDeclaredMethod("getSummary");
+                                List<? extends DocTree> summaryList = (List<? extends DocTree>)getSummaryMethod.invoke(tag);
+                                sb.append(inlineTags(summaryList, docPath, doc, trees, null));
+                            } catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                                // IGNORE
+                            }
+                            break;
+                        default : 
+                            break;
                     }
                     break;
                 }
