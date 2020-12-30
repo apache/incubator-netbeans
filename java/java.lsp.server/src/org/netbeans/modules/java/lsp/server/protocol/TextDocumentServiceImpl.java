@@ -31,20 +31,27 @@ import com.sun.source.tree.VariableTree;
 import com.sun.source.util.TreePath;
 import com.vladsch.flexmark.html2md.converter.FlexmarkHtmlConverter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -78,7 +85,6 @@ import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.CompletionTriggerKind;
-import org.eclipse.lsp4j.CreateFile;
 import org.eclipse.lsp4j.DefinitionParams;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -106,7 +112,6 @@ import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.RenameParams;
-import org.eclipse.lsp4j.ResourceOperation;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SignatureHelpParams;
 import org.eclipse.lsp4j.SymbolInformation;
@@ -147,12 +152,9 @@ import org.netbeans.modules.java.completion.JavaDocumentationTask;
 import org.netbeans.modules.java.editor.base.semantic.MarkOccurrencesHighlighterBase;
 import org.netbeans.modules.java.editor.codegen.GeneratorUtils;
 import org.netbeans.modules.java.editor.options.MarkOccurencesSettings;
-import org.netbeans.modules.java.hints.errors.CreateFixBase;
 import org.netbeans.modules.java.hints.errors.ImportClass;
 import org.netbeans.modules.java.hints.infrastructure.CreatorBasedLazyFixList;
 import org.netbeans.modules.java.hints.infrastructure.ErrorHintsProvider;
-import org.netbeans.modules.java.hints.introduce.IntroduceHint;
-import org.netbeans.modules.java.hints.introduce.IntroduceKind;
 import org.netbeans.modules.java.hints.project.IncompleteClassPath;
 import org.netbeans.modules.java.hints.spiimpl.JavaFixImpl;
 import org.netbeans.modules.java.hints.spiimpl.hints.HintsInvoker;
@@ -177,10 +179,14 @@ import org.netbeans.spi.editor.hints.LazyFixList;
 import org.netbeans.spi.java.hints.JavaFix;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
+import org.openide.filesystems.URLMapper;
+import org.openide.modules.Places;
 import org.openide.text.NbDocument;
 import org.openide.text.PositionBounds;
 import org.openide.util.Exceptions;
-import org.openide.util.Lookup;
+import org.openide.util.NbBundle.Messages;
+import org.openide.util.Pair;
 import org.openide.util.RequestProcessor;
 import org.openide.util.lookup.Lookups;
 
@@ -687,55 +693,12 @@ public class TextDocumentServiceImpl implements TextDocumentService, LanguageCli
     }
 
     public static String html2MD(String html) {
-        int idx = html.indexOf("<p id=\"not-found\">"); // strip "No Javadoc found" message
-        return FlexmarkHtmlConverter.builder().build().convert(idx >= 0 ? html.substring(0, idx) : html).replaceAll("<br />[ \n]*$", "");
+        return FlexmarkHtmlConverter.builder().build().convert(html).replaceAll("<br />[ \n]*$", "");
     }
 
     @Override
     public CompletableFuture<Hover> hover(HoverParams params) {
-        try {
-            String uri = params.getTextDocument().getUri();
-            FileObject file = Utils.fromUri(uri);
-            EditorCookie ec = file.getLookup().lookup(EditorCookie.class);
-            Document doc = ec.openDocument();
-            final JavaDocumentationTask<Future<String>> task = JavaDocumentationTask.create(Utils.getOffset(doc, params.getPosition()), null, new JavaDocumentationTask.DocumentationFactory<Future<String>>() {
-                @Override
-                public Future<String> create(CompilationInfo compilationInfo, Element element, Callable<Boolean> cancel) {
-                    return ElementJavadoc.create(compilationInfo, element, cancel).getTextAsync();
-                }
-            }, () -> false);
-            ParserManager.parse(Collections.singletonList(Source.create(doc)), new UserTask() {
-                @Override
-                public void run(ResultIterator resultIterator) throws Exception {
-                    task.run(resultIterator);
-                }
-            });
-            Future<String> futureJavadoc = task.getDocumentation();
-            CompletableFuture<Hover> result = new CompletableFuture<Hover>() {
-                @Override
-                public boolean cancel(boolean mayInterruptIfRunning) {
-                    return futureJavadoc != null && futureJavadoc.cancel(mayInterruptIfRunning) && super.cancel(mayInterruptIfRunning);
-                }
-            };
-            JAVADOC_WORKER.post(() -> {
-                try {
-                    String javadoc = futureJavadoc != null ? futureJavadoc.get() : null;
-                    if (javadoc != null) {
-                        MarkupContent markup = new MarkupContent();
-                        markup.setKind("markdown");
-                        markup.setValue(html2MD(javadoc));
-                        result.complete(new Hover(markup));
-                    } else {
-                        result.complete(null);
-                    }
-                } catch (ExecutionException | InterruptedException ex) {
-                    result.completeExceptionally(ex);
-                }
-            });
-            return result;
-        } catch (IOException | ParseException ex) {
-            throw new IllegalStateException(ex);
-        }
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -997,13 +960,18 @@ public class TextDocumentServiceImpl implements TextDocumentService, LanguageCli
     }
 
     @Override
+    @Messages({
+        "DN_GenerateGetters=Generate getter(s).",
+        "DN_GenerateSetters=Generate setter(s).",
+        "DN_GenerateGettersSetters=Generate getter(s) and setter(s).",
+    })
     public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(CodeActionParams params) {
         Document doc = openedDocuments.get(params.getTextDocument().getUri());
-        JavaSource js = JavaSource.forDocument(doc);
-        if (doc == null || js == null) {
+        if (doc == null) {
             return CompletableFuture.completedFuture(Collections.emptyList());
         }
         Map<String, ErrorDescription> id2Errors = (Map<String, ErrorDescription>) doc.getProperty("lsp-errors");
+        JavaSource js = JavaSource.forDocument(doc);
         List<Either<Command, CodeAction>> result = new ArrayList<>();
         if (id2Errors != null) {
         for (Diagnostic diag : params.getContext().getDiagnostics()) {
@@ -1087,49 +1055,6 @@ public class TextDocumentServiceImpl implements TextDocumentService, LanguageCli
                         client.logMessage(new MessageParams(MessageType.Error, ex.getMessage()));
                     }
                 }
-                if (f instanceof CreateFixBase) {
-                    try {
-                        CreateFixBase cf = (CreateFixBase) f;
-                        ModificationResult changes = cf.getModificationResult();
-                        List<Either<TextDocumentEdit, ResourceOperation>> documentChanges = new ArrayList<>();
-                        Set<File> newFiles = changes.getNewFiles();
-                        if (newFiles.size() > 1) {
-                            throw new IllegalStateException();
-                        }
-                        String newFilePath = null;
-                        for (File newFile : newFiles) {
-                            newFilePath = newFile.getPath();
-                            documentChanges.add(Either.forRight(new CreateFile(newFilePath)));
-                        }
-                        for (FileObject fileObject : changes.getModifiedFileObjects()) {
-                            List<? extends ModificationResult.Difference> diffs = changes.getDifferences(fileObject);
-                            if (diffs != null) {
-                                List<TextEdit> edits = new ArrayList<>();
-                                for (ModificationResult.Difference diff : diffs) {
-                                    String newText = diff.getNewText();
-                                    if (diff.getKind() == ModificationResult.Difference.Kind.CREATE) {
-                                        if (newFilePath != null) {
-                                            documentChanges.add(Either.forLeft(new TextDocumentEdit(new VersionedTextDocumentIdentifier(newFilePath, -1),
-                                                    Collections.singletonList(new TextEdit(new Range(Utils.createPosition(fileObject, 0), Utils.createPosition(fileObject, 0)),
-                                                            newText != null ? newText : "")))));
-                                        }
-                                    } else {
-                                        edits.add(new TextEdit(new Range(Utils.createPosition(fileObject, diff.getStartPosition().getOffset()),
-                                                                         Utils.createPosition(fileObject, diff.getEndPosition().getOffset())),
-                                                               newText != null ? newText : ""));
-                                    }
-                                }
-                                documentChanges.add(Either.forLeft(new TextDocumentEdit(new VersionedTextDocumentIdentifier(Utils.toUri(fileObject), -1), edits)));
-                            }
-                        }
-                        CodeAction codeAction = new CodeAction(f.getText());
-                        codeAction.setKind(CodeActionKind.QuickFix);
-                        codeAction.setEdit(new WorkspaceEdit(documentChanges));
-                        result.add(Either.forRight(codeAction));
-                    } catch (IOException ex) {
-                        client.logMessage(new MessageParams(MessageType.Error, ex.getMessage()));
-                    }
-                }
             }
         }
         }
@@ -1138,10 +1063,20 @@ public class TextDocumentServiceImpl implements TextDocumentService, LanguageCli
         try {
             js.runUserActionTask(cc -> {
                 cc.toPhase(JavaSource.Phase.RESOLVED);
-                for (CodeGenerator codeGenerator : Lookup.getDefault().lookupAll(CodeGenerator.class)) {
-                    for (CodeAction codeAction : codeGenerator.getCodeActions(cc, params)) {
-                        result.add(Either.forRight(codeAction));
-                    }
+
+                Pair<Set<VariableElement>, Set<VariableElement>> pair = GetterSetterGenerator.findMissingGettersSetters(cc, params.getRange(), false);
+                boolean missingGetters = !pair.first().isEmpty();
+                boolean missingSetters = !pair.second().isEmpty();
+                String uri = toUri(cc.getFileObject());
+
+                if (missingGetters) {
+                    result.add(Either.forRight(createCodeGeneratorAction(Bundle.DN_GenerateGetters(), Server.GENERATE_GETTERS, uri, params.getRange())));
+                }
+                if (missingSetters) {
+                    result.add(Either.forRight(createCodeGeneratorAction(Bundle.DN_GenerateSetters(), Server.GENERATE_SETTERS, uri, params.getRange())));
+                }
+                if (missingGetters && missingSetters) {
+                    result.add(Either.forRight(createCodeGeneratorAction(Bundle.DN_GenerateGettersSetters(), Server.GENERATE_GETTERS_SETTERS, uri, params.getRange())));
                 }
             }, true);
         } catch (IOException ex) {
@@ -1151,6 +1086,17 @@ public class TextDocumentServiceImpl implements TextDocumentService, LanguageCli
 
         return CompletableFuture.completedFuture(result);
     }
+
+    private CodeAction createCodeGeneratorAction(String name, String command, String uri, Range range) {
+        CodeAction action = new CodeAction(name);
+        List<Object> arguments = new ArrayList<>();
+
+        arguments.add(uri);
+        arguments.add(range);
+        action.setCommand(new Command(name, command, arguments));
+        return action;
+    }
+
 
     //TODO: copied from spi.editor.hints/.../FixData:
     private List<Fix> sortFixes(Collection<Fix> fixes) {
@@ -1327,7 +1273,7 @@ public class TextDocumentServiceImpl implements TextDocumentService, LanguageCli
                             case HINT: diag.setSeverity(DiagnosticSeverity.Hint); break;
                             default: diag.setSeverity(DiagnosticSeverity.Information); break;
                         }
-                        String id = keyPrefix + ":" + idx++ + "-" + err.getId();
+                        String id = keyPrefix + ":" + idx + "-" + err.getId();
                         diag.setCode(id);
                         id2Errors.put(id, err);
                         diags.add(diag);
@@ -1402,6 +1348,88 @@ public class TextDocumentServiceImpl implements TextDocumentService, LanguageCli
         return LineDocumentUtils.getLineStartFromIndex((LineDocument) doc, pos.getLine()) + pos.getCharacter();
     }
 
+    private static String toUri(FileObject file) {
+        if (FileUtil.isArchiveArtifact(file)) {
+            //VS code cannot open jar:file: URLs, workaround:
+            //another workaround, should be:
+            //File cacheDir = Places.getCacheSubfile("java-server");
+            //but that locks up VS Code, using a temp directory:
+            File cacheDir;
+            try {
+                cacheDir = Files.createTempDirectory("nbcode").toFile();
+            } catch (IOException ex) {
+                throw new UncheckedIOException(ex);
+            }
+            File segments = new File(cacheDir, "segments");
+            Properties props = new Properties();
+
+            try (InputStream in = new FileInputStream(segments)) {
+                props.load(in);
+            } catch (IOException ex) {
+                //OK, may not exist yet
+            }
+            FileObject archive = FileUtil.getArchiveFile(file);
+            String archiveString = archive.toURL().toString();
+            File foundSegment = null;
+            for (String segment : props.stringPropertyNames()) {
+                if (archiveString.equals(props.getProperty(segment))) {
+                    foundSegment = new File(cacheDir, segment);
+                    break;
+                }
+            }
+            if (foundSegment == null) {
+                int i = 0;
+                while (props.getProperty("s" + i) != null)
+                    i++;
+                foundSegment = new File(cacheDir, "s" + i);
+                props.put("s" + i, archiveString);
+                try (OutputStream in = new FileOutputStream(segments)) {
+                    props.store(in, "");
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+            File cache = new File(foundSegment, FileUtil.getRelativePath(FileUtil.getArchiveRoot(archive), file));
+            cache.getParentFile().mkdirs();
+            try (OutputStream out = new FileOutputStream(cache)) {
+                out.write(file.asBytes());
+                return cache.toURI().toString();
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        return file.toURI().toString();
+    }
+
+    //TODO: move to a separate Utils class:
+    public static FileObject fromUri(String uri) throws MalformedURLException {
+        File cacheDir = Places.getCacheSubfile("java-server");
+        URI uriUri = URI.create(uri);
+        URI relative = cacheDir.toURI().relativize(uriUri);
+        if (relative != null && new File(cacheDir, relative.toString()).canRead()) {
+            String segmentAndPath = relative.toString();
+            int slash = segmentAndPath.indexOf('/');
+            String segment = segmentAndPath.substring(0, slash);
+            String path = segmentAndPath.substring(slash + 1);
+            File segments = new File(cacheDir, "segments");
+            Properties props = new Properties();
+
+            try (InputStream in = new FileInputStream(segments)) {
+                props.load(in);
+                String archiveUri = props.getProperty(segment);
+                FileObject archive = URLMapper.findFileObject(URI.create(archiveUri).toURL());
+                archive = archive != null ? FileUtil.getArchiveRoot(archive) : null;
+                FileObject file = archive != null ? archive.getFileObject(path) : null;
+                if (file != null) {
+                    return file;
+                }
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        return URLMapper.findFileObject(URI.create(uri).toURL());
+    }
+
     public static List<TextEdit> modify2TextEdits(JavaSource js, Task<WorkingCopy> task) throws IOException {
         FileObject[] file = new FileObject[1];
         LineMap[] lm = new LineMap[1];
@@ -1424,13 +1452,13 @@ public class TextDocumentServiceImpl implements TextDocumentService, LanguageCli
         }
         return edits;
     }
-
+    
     private static void reportNotificationDone(String s, Object parameter) {
         if (HOOK_NOTIFICATION != null) {
             HOOK_NOTIFICATION.accept(s, parameter);
         }
     }
-
+    
     /**
      * For testing only; calls that do not return a result should call
      * this hook, if defined, with the method name and parameter.

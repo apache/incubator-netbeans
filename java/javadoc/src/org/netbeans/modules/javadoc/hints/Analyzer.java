@@ -633,7 +633,7 @@ final class Analyzer extends DocTreePathScanner<Void, List<ErrorDescription>> {
         if (t == null) {
             errors.add(ErrorDescriptionFactory.forSpan(ctx, start, end, TAG_UNKNOWN(treeName)));
         } else {
-            if (!isVoid(t)) {
+            if (!t.hasOptionalEndTag() && !isVoid(t)) {
                 tagStack.push(node);
             }
         }
