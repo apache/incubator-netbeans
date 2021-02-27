@@ -256,4 +256,9 @@ final class CompletionFilter extends DocTrees {
     public DocTreeFactory getDocTreeFactory() {
         return delegate.getDocTreeFactory();
     }
+
+    @Override
+    public TypeMirror getType(DocTreePath dtp) {
+        throw new UnsupportedOperationException();
+    }
 }
