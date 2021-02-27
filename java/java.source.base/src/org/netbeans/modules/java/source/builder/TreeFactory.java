@@ -63,6 +63,7 @@ import com.sun.tools.javac.model.JavacTypes;
 import com.sun.tools.javac.tree.DocTreeMaker;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.*;
+import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.DiagnosticSource;
 import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Name;
@@ -220,7 +221,8 @@ public class TreeFactory {
         for (StatementTree t : statements)
             lb.append((JCStatement)t);
         try {
-            return make.at(NOPOS).Case((JCExpression)expression, lb.toList());
+            final TreeMaker at = make.at(NOPOS);
+            return at.Case(CaseTree.CaseKind.STATEMENT, com.sun.tools.javac.util.List.of((JCExpression)expression), lb.toList(), null);
         } catch (NoSuchMethodError err) {
             try {
                 Class<Enum> caseKind = (Class<Enum>) Class.forName("com.sun.source.tree.CaseTree$CaseKind", false, JCTree.class.getClassLoader());
@@ -1926,7 +1928,7 @@ public class TreeFactory {
         if (refrenceTree != null) {
             return refrenceTree;
         }
-        return docMake.at(NOPOS).newReferenceTree("", (JCExpression) qualExpr, member != null ? (Name) names.fromString(member.toString()) : null, paramTypesList);
+        return docMake.at(NOPOS).newReferenceTree("", null, (JCExpression) qualExpr, member != null ? (Name) names.fromString(member.toString()) : null, paramTypesList);
     }
     
     @SuppressWarnings("unchecked")
