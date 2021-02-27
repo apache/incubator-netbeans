@@ -222,7 +222,8 @@ public class TreeFactory {
             lb.append((JCStatement)t);
         try {
             final TreeMaker at = make.at(NOPOS);
-            return at.Case(CaseTree.CaseKind.STATEMENT, com.sun.tools.javac.util.List.of((JCExpression)expression), lb.toList(), null);
+            final com.sun.tools.javac.util.List<JCExpression> exprList = expression == null ? com.sun.tools.javac.util.List.nil() : com.sun.tools.javac.util.List.of((JCExpression)expression);
+            return at.Case(CaseTree.CaseKind.STATEMENT, exprList, lb.toList(), null);
         } catch (NoSuchMethodError err) {
             try {
                 Class<Enum> caseKind = (Class<Enum>) Class.forName("com.sun.source.tree.CaseTree$CaseKind", false, JCTree.class.getClassLoader());
