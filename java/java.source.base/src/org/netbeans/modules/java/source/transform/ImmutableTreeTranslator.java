@@ -1401,4 +1401,19 @@ public class ImmutableTreeTranslator implements TreeVisitor<Tree,Object> {
 	}
 	return tree;
     }
+
+    @Override
+    public Tree visitBindingPattern(BindingPatternTree node, Object p) {
+        return node;
+    }
+
+    @Override
+    public Tree visitSwitchExpression(SwitchExpressionTree node, Object p) {
+        return node;
+    }
+
+    @Override
+    public Tree visitYield(YieldTree node, Object p) {
+        return node;
+    }
 }

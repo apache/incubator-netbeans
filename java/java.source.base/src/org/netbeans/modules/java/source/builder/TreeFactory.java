@@ -63,11 +63,13 @@ import com.sun.tools.javac.model.JavacTypes;
 import com.sun.tools.javac.tree.DocTreeMaker;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.*;
+import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.DiagnosticSource;
 import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Names;
 import com.sun.tools.javac.util.Context;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -220,7 +222,9 @@ public class TreeFactory {
         for (StatementTree t : statements)
             lb.append((JCStatement)t);
         try {
-            return make.at(NOPOS).Case((JCExpression)expression, lb.toList());
+            final TreeMaker at = make.at(NOPOS);
+            final com.sun.tools.javac.util.List<JCExpression> exprList = expression == null ? com.sun.tools.javac.util.List.nil() : com.sun.tools.javac.util.List.of((JCExpression)expression);
+            return at.Case(CaseTree.CaseKind.STATEMENT, exprList, lb.toList(), null);
         } catch (NoSuchMethodError err) {
             try {
                 Class<Enum> caseKind = (Class<Enum>) Class.forName("com.sun.source.tree.CaseTree$CaseKind", false, JCTree.class.getClassLoader());
@@ -1914,19 +1918,36 @@ public class TreeFactory {
     }
 
     public ReferenceTree Reference(ExpressionTree qualExpr, CharSequence member, List<? extends Tree> paramTypes) {
-        com.sun.tools.javac.util.List<JCTree> paramTypesList = null;
+        com.sun.tools.javac.util.List<JCTree> paramTypesParam = null;
         if (paramTypes != null) {
             ListBuffer<JCTree> lbl = new ListBuffer<>();
             for (Tree t : paramTypes) {
                 lbl.append((JCTree) t);
             }
-            paramTypesList = lbl.toList();
+            paramTypesParam = lbl.toList();
         }
-        ReferenceTree refrenceTree = TreeShims.getRefrenceTree(docMake, qualExpr, member, paramTypes, names, paramTypesList);
+        ReferenceTree refrenceTree = TreeShims.getRefrenceTree(docMake, qualExpr, member, paramTypes, names, paramTypesParam);
         if (refrenceTree != null) {
             return refrenceTree;
         }
-        return docMake.at(NOPOS).newReferenceTree("", (JCExpression) qualExpr, member != null ? (Name) names.fromString(member.toString()) : null, paramTypesList);
+        final String signatureParam = "";
+        final JCExpression qualExprParam = (JCExpression) qualExpr;
+        Name memberParam = member != null ? (Name) names.fromString(member.toString()) : null;
+        final DocTreeMaker dispatchTo = docMake.at(NOPOS);
+        for (java.lang.reflect.Method m : dispatchTo.getClass().getMethods()) {
+            if ("newReferenceTree".equals(m.getName()) && m.getParameterTypes().length >= 4) { // NOI18N
+                try {
+                    if (m.getParameterTypes().length == 5) {
+                        return (ReferenceTree) m.invoke(dispatchTo, signatureParam, null, qualExprParam, memberParam, paramTypesParam);
+                    } else {
+                        return (ReferenceTree) m.invoke(dispatchTo, signatureParam, qualExprParam, memberParam, paramTypesParam);
+                    }
+                } catch (ReflectiveOperationException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+        }
+        throw new IllegalStateException();
     }
     
     @SuppressWarnings("unchecked")

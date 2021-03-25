@@ -196,11 +196,7 @@ public class SourceUtils {
     
     public static TypeMirror getBound(WildcardType wildcardType) {
         Type.TypeVar bound = ((Type.WildcardType)wildcardType).bound;
-        try {
-            return bound != null ? bound.bound : null;
-        } catch (NoSuchFieldError err) {
-            return bound != null ? bound.getUpperBound() : null;
-        }
+        return bound != null ? bound.getUpperBound() : null;
     }
 
     /**

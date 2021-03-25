@@ -1,11 +1,12 @@
-Name: Javac Compiler
-Description: Javac Compiler
-Version: 9
+Name: Javac Compiler API
+Description: Javac Compiler API
+Version: 15.0.0.2
 License: GPL-2-CP
 Origin: OpenJDK (http://hg.openjdk.java.net/)
-Source: http://hg.openjdk.java.net/jdk9/jdk9/langtools/archive/tip.zip
-Type: compile-time
-Comment: Used at compile to compile code that runs either against JDK 9+ or (optional) nb-javac library.
+Source: http://hg.netbeans.org/main/nb-java-x/
+Type: compile-time,optional
+Comment: Used at design time to compile against; optional at runtime.
+Files: nb-javac-15.0.0.2.jar nb-javac-15.0.0.2-api.jar
 
 The GNU General Public License (GPL)
 

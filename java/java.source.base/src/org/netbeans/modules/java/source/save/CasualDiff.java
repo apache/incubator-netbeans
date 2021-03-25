@@ -5817,7 +5817,7 @@ public class CasualDiff {
     }
 
     private boolean matchCase(JCCase t1, JCCase t2) {
-        return treesMatch(t1.pat, t2.pat) && listsMatch(t1.stats, t2.stats);
+        return treesMatch(t1.getExpression(), t2.getExpression()) && listsMatch(t1.stats, t2.stats);
     }
 
     private boolean matchSynchronized(JCSynchronized t1, JCSynchronized t2) {
