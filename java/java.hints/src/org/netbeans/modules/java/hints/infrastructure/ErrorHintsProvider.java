@@ -51,6 +51,7 @@ import org.netbeans.api.java.lexer.JavaTokenId;
 import org.netbeans.api.java.source.CompilationInfo;
 import org.netbeans.api.java.source.JavaParserResultTask;
 import org.netbeans.api.java.source.JavaSource.Phase;
+import org.netbeans.api.java.source.SourceUtils;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
@@ -732,6 +733,10 @@ public final class ErrorHintsProvider extends JavaParserResultTask {
         CompilationInfo info = CompilationInfo.get(result);
 
         if (info == null) {
+            return ;
+        }
+
+        if (SourceUtils.hasRemoteEditorPlatform(info.getFileObject())) {
             return ;
         }
 
