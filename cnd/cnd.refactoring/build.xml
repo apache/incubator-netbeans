@@ -32,6 +32,17 @@
         <copy todir="${build.test.unit.dir}/data">
             <fileset dir="../cnd.modelimpl/test/unit/data">
                 <include name="cnd/common/**"/>
+<project name="cnd/cnd.refactoring" default="netbeans" basedir=".">
+    <description>Builds, tests, and runs the project org.netbeans.modules.cnd.refactoring.</description>
+    <import file="../../nbbuild/templates/projectized.xml"/>
+
+    <!-- RefactoringBaseTestCase wants Quote sources -->
+
+    <target name="cnd/do-unit-test-build" depends="projectized.do-unit-test-build">
+        <copy todir="${build.test.unit.dir}/data">
+            <fileset dir="../cnd.modelimpl/test/unit/data">
+                <include name="cnd/common/**"/>
+
             </fileset>
         </copy>
     </target>

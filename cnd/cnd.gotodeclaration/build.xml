@@ -33,6 +33,16 @@
         <copy todir="${build.test.unit.dir}/data">
             <fileset dir="../cnd.modelimpl/test/unit/data">
                 <include name="cnd/common/**"/>
+<project name="cnd/cnd.gotodeclaration" default="netbeans" basedir=".">
+    <description>Builds, tests, and runs the project org.netbeans.modules.cnd.gotodeclaration.</description>
+    <import file="../../nbbuild/templates/projectized.xml"/>
+
+    <!-- CppSymbolBaseTestCase wants Quote sources -->
+
+    <target name="cnd/do-unit-test-build" depends="projectized.do-unit-test-build">
+        <copy todir="${build.test.unit.dir}/data">
+            <fileset dir="../cnd.modelimpl/test/unit/data">
+                <include name="cnd/common/**"/>
             </fileset>
         </copy>
     </target>

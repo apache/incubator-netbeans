@@ -1,5 +1,5 @@
 #Signature file v4.1
-#Version 2.3
+#Version 2.4
 
 CLSS public abstract interface java.io.Closeable
 intf java.lang.AutoCloseable
@@ -1753,6 +1753,8 @@ fld public final static org.netbeans.modules.payara.tooling.server.config.JavaEE
 fld public final static org.netbeans.modules.payara.tooling.server.config.JavaEEProfile v1_7_web
 fld public final static org.netbeans.modules.payara.tooling.server.config.JavaEEProfile v1_8
 fld public final static org.netbeans.modules.payara.tooling.server.config.JavaEEProfile v1_8_web
+fld public final static org.netbeans.modules.payara.tooling.server.config.JavaEEProfile v8_0_0
+fld public final static org.netbeans.modules.payara.tooling.server.config.JavaEEProfile v8_0_0_web
 innr public final static !enum Type
 innr public final static !enum Version
 meth public java.lang.String toString()
@@ -1783,6 +1785,7 @@ fld public final static org.netbeans.modules.payara.tooling.server.config.JavaEE
 fld public final static org.netbeans.modules.payara.tooling.server.config.JavaEEProfile$Version v1_6
 fld public final static org.netbeans.modules.payara.tooling.server.config.JavaEEProfile$Version v1_7
 fld public final static org.netbeans.modules.payara.tooling.server.config.JavaEEProfile$Version v1_8
+fld public final static org.netbeans.modules.payara.tooling.server.config.JavaEEProfile$Version v8_0_0
 meth public java.lang.String toString()
 meth public static org.netbeans.modules.payara.tooling.server.config.JavaEEProfile$Version valueOf(java.lang.String)
 meth public static org.netbeans.modules.payara.tooling.server.config.JavaEEProfile$Version[] values()
