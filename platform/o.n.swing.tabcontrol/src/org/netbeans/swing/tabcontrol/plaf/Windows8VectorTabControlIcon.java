@@ -43,7 +43,7 @@ import javax.swing.Icon;
  * @author Eirik Bakke
  */
 @SuppressWarnings("serial")
-final class Windows8VectorTabControlIcon extends VectorIcon {
+public final class Windows8VectorTabControlIcon extends VectorIcon {
     private static final Map<Entry<Integer,Integer>,Icon> INSTANCES = populateInstances();
     private final int buttonId;
     private final int buttonState;
@@ -90,7 +90,7 @@ final class Windows8VectorTabControlIcon extends VectorIcon {
     }
 
     private Windows8VectorTabControlIcon(int buttonId, int buttonState) {
-        super(14, 14);
+        super(14, buttonId == TabControlButton.ID_CLOSE_BUTTON ? 15 : 14);
         this.buttonId = buttonId;
         this.buttonState = buttonState;
     }
@@ -142,7 +142,7 @@ final class Windows8VectorTabControlIcon extends VectorIcon {
                 strokeWidth *= 1.5f;
             }
             double marginX = 3.5 * scaling; // Don't round this one.
-            int topMarginY = round(3 * scaling);
+            int topMarginY = round(4 * scaling);
             int botMarginY = round(4 * scaling);
             // Flatten the top and bottom.
             g.clip(new Rectangle2D.Double(0, topMarginY, width, height - topMarginY - botMarginY));
