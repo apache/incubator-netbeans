@@ -620,18 +620,10 @@ public final class ToolbarConfiguration implements ToolbarPool.Configuration {
             //add border
             if ("Windows".equals(UIManager.getLookAndFeel().getID())) { //NOI18N
                 if( isXPTheme() ) {
-                    if( isWindows8() ) {
-                        toolbarPanel.setBorder( BorderFactory.createEmptyBorder() );
-                    } else {
-                        //Set up custom borders for XP
-                        toolbarPanel.setBorder(BorderFactory.createCompoundBorder(
-                            upperBorder,
-                            BorderFactory.createCompoundBorder(
-                                BorderFactory.createMatteBorder(0, 0, 1, 0,
-                                fetchColor("controlShadow", Color.DARK_GRAY)),
-                                BorderFactory.createMatteBorder(0, 0, 1, 0, mid))
-                        )); //NOI18N
-                    }
+                    /* There used to be some more elaborate borders for Windows versions pre
+                    Windows 8 here. As of May 2021, all of those OS versions are discontinued,
+                    though. So just support the modern simplified look here. */
+                    toolbarPanel.setBorder( BorderFactory.createEmptyBorder() );
                 } else {
                     toolbarPanel.setBorder( BorderFactory.createEtchedBorder() );
                 }
