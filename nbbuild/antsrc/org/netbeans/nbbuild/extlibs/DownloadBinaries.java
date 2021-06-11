@@ -59,7 +59,7 @@ import org.apache.tools.ant.util.FileUtils;
  * Motivation: http://wiki.netbeans.org/wiki/view/HgMigration#section-HgMigration-Binaries
  */
 public class DownloadBinaries extends Task {
-    private static final String MAVEN_REPO = "https://repo1.maven.org/maven2/";
+    private static final String MAVEN_REPO = "https://repo1.maven.org/maven2/ https://oss.sonatype.org/content/repositories/comdukescript-1144/";
 
     private File cache;
     /**
@@ -158,12 +158,17 @@ public class DownloadBinaries extends Task {
                                 throw new BuildException("Bad line '" + line + "' in " + manifest, getLocation());
                             }
 
+                            boolean ok;
                             if (MavenCoordinate.isMavenFile(hashAndFile[1])) {
                                 MavenCoordinate mc = MavenCoordinate.fromGradleFormat(hashAndFile[1]);
-                                success &= fillInFile(hashAndFile[0], mc.toArtifactFilename(), manifest, () -> mavenFile(mc));
+                                ok = fillInFile(hashAndFile[0], mc.toArtifactFilename(), manifest, () -> mavenFile(mc));
                             } else {
-                                success &= fillInFile(hashAndFile[0], hashAndFile[1], manifest, () -> legacyDownload(hashAndFile[0] + "-" + hashAndFile[1]));
+                                ok = fillInFile(hashAndFile[0], hashAndFile[1], manifest, () -> legacyDownload(hashAndFile[0] + "-" + hashAndFile[1]));
                             }
+                            if (!ok) {
+                                log("Failure downloading: " + line, Project.MSG_WARN);
+                            }
+                            success &= ok;
                         }
                     }
                 } catch (IOException x) {

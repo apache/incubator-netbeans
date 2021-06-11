@@ -16,27 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.netbeans.modules.java.source.nbjavac.indexing;
+package org.netbeans.modules.java.source.transform;
 
-import java.util.Collection;
-import org.netbeans.modules.java.source.indexing.CompileWorker.ParsingOutput;
-import org.netbeans.modules.java.source.indexing.JavaCustomIndexer.CompileTuple;
-import org.netbeans.modules.java.source.indexing.JavaParsingContext;
-import org.netbeans.modules.parsing.spi.indexing.Context;
+import com.sun.source.tree.CompilationUnitTree;
+import com.sun.source.tree.Tree;
+import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
+import com.sun.tools.javac.tree.JCTree.Tag;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
  * @author lahvac
  */
-public class OnePassCompileWorkerTest extends NBJavacCompileWorkerTestBase {
-    
-    public OnePassCompileWorkerTest(String name) {
-        super(name);
+public class TreeHelpers {
+    public static List<? extends Tree> getCombinedTopLevelDecls(CompilationUnitTree cut) {
+        JCCompilationUnit cu = (JCCompilationUnit) cut;
+        return cu.defs.stream()
+                      .filter(t -> t.hasTag(Tag.CLASSDEF) || t.hasTag(Tag.MODULEDEF))
+                      .collect(Collectors.toList());
     }
 
-    @Override
-    protected ParsingOutput runCompileWorker(Context context, JavaParsingContext javaContext, Collection<? extends CompileTuple> files) {
-        return new OnePassCompileWorker().compile(null, context, javaContext, files);
-    }
-    
 }

@@ -73,7 +73,7 @@ public class CompletionTestBase extends CompletionTestBaseBase {
         assertNotNull(testSourceFO);
         DataObject testSourceDO = DataObject.find(testSourceFO);
         assertNotNull(testSourceDO);
-        EditorCookie ec = (EditorCookie) testSourceDO.getCookie(EditorCookie.class);
+        EditorCookie ec = testSourceDO.getLookup().lookup(EditorCookie.class);
         assertNotNull(ec);
         final Document doc = ec.openDocument();
         assertNotNull(doc);
@@ -96,6 +96,7 @@ public class CompletionTestBase extends CompletionTestBaseBase {
                 if (!(org.openide.util.Utilities.isMac() && itemString.equals("apple") //ignoring 'apple' package
                         || itemString.equals("jdk")        //ignoring 'jdk' package introduced by jdk1.7.0_40
                         || itemString.equals("netscape")   //ignoring 'netscape' package present in some JDK builds
+                        || itemString.equals("nbjavac")    //ignoring 'nbjavac' package, if present
                         || itemString.equals("oracle"))) { //ignoring 'oracle' package present in some JDK builds
                     out.write(itemString);
                     out.write("\n");
