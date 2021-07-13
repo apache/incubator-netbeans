@@ -26,11 +26,15 @@ import org.netbeans.api.debugger.Breakpoint;
 import org.netbeans.api.debugger.DebuggerEngine;
 
 import org.netbeans.api.extexecution.ExecutionDescriptor;
+import org.netbeans.modules.nativeimage.api.Location;
+import org.netbeans.modules.nativeimage.api.SourceInfo;
+import org.netbeans.modules.nativeimage.api.Symbol;
 import org.netbeans.modules.nativeimage.api.debug.NIFrame;
 import org.netbeans.modules.nativeimage.api.debug.NILineBreakpointDescriptor;
 import org.netbeans.modules.nativeimage.api.debug.NIVariable;
 import org.netbeans.modules.nativeimage.spi.debug.filters.FrameDisplayer;
 import org.netbeans.modules.nativeimage.spi.debug.filters.VariableDisplayer;
+import org.openide.util.Pair;
 
 /**
  * Provider of the native image debugger.
@@ -120,4 +124,24 @@ public interface NIDebuggerProvider {
      * @since 1.0
      */
     String getVersion();
+
+    /**
+     * Provide a list of locations for a given file path.
+     *
+     * @param filePath a file path
+     * @return list of locations, or <code>null</code> when there's no location
+     *         information about such file.
+     * @since 0.2
+     */
+    default List<Location> listLocations(String filePath) {
+        return null;
+    }
+
+    default List<Pair<SourceInfo, List<Symbol>>> listFunctions(String name, boolean includeNondebug, int maxResults) {
+        return null;
+    }
+
+    default List<Pair<SourceInfo, List<Symbol>>> listVariables(String name, boolean includeNondebug, int maxResults) {
+        return null;
+    }
 }

@@ -32,6 +32,9 @@ import org.netbeans.modules.cpplite.debugger.CPPFrame;
 import org.netbeans.modules.cpplite.debugger.CPPLiteDebugger;
 import org.netbeans.modules.cpplite.debugger.CPPLiteDebuggerConfig;
 import org.netbeans.modules.cpplite.debugger.CPPThread;
+import org.netbeans.modules.nativeimage.api.Location;
+import org.netbeans.modules.nativeimage.api.SourceInfo;
+import org.netbeans.modules.nativeimage.api.Symbol;
 import org.netbeans.modules.nativeimage.api.debug.EvaluateException;
 import org.netbeans.modules.nativeimage.api.debug.NIFrame;
 import org.netbeans.modules.nativeimage.api.debug.NILineBreakpointDescriptor;
@@ -180,4 +183,20 @@ public class NIDebuggerProviderImpl implements NIDebuggerProvider {
     public String getVersion() {
         return debugger.getVersion();
     }
+
+    @Override
+    public List<Location> listLocations(String filePath) {
+        return debugger.listLocations(filePath);
+    }
+
+    @Override
+    public List<Pair<SourceInfo, List<Symbol>>> listFunctions(String name, boolean includeNondebug, int maxResults) {
+        return debugger.listFunctions(name, includeNondebug, maxResults);
+    }
+
+    @Override
+    public List<Pair<SourceInfo, List<Symbol>>> listVariables(String name, boolean includeNondebug, int maxResults) {
+        return debugger.listVariables(name, includeNondebug, maxResults);
+    }
+
 }
